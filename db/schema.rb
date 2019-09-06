@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_05_210030) do
+ActiveRecord::Schema.define(version: 2019_09_06_180516) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -24,11 +24,23 @@ ActiveRecord::Schema.define(version: 2019_09_05_210030) do
     t.index ["user_id"], name: "index_favorites_on_user_id"
   end
 
+  create_table "moons", force: :cascade do |t|
+    t.bigint "planet_id", null: false
+    t.string "name"
+    t.boolean "isPlanet"
+    t.integer "density"
+    t.integer "gravity"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["planet_id"], name: "index_moons_on_planet_id"
+  end
+
   create_table "planets", force: :cascade do |t|
     t.string "name"
     t.string "latin_name"
     t.boolean "isPlanet"
-    t.string "aroundPlanet"
+    t.integer "gravity"
+    t.integer "density"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
@@ -42,4 +54,5 @@ ActiveRecord::Schema.define(version: 2019_09_05_210030) do
 
   add_foreign_key "favorites", "planets"
   add_foreign_key "favorites", "users"
+  add_foreign_key "moons", "planets"
 end

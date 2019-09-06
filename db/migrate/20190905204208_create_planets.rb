@@ -4,7 +4,8 @@ class CreatePlanets < ActiveRecord::Migration[6.0]
       t.string :name
       t.string :latin_name
       t.boolean :isPlanet
-      t.string :aroundPlanet
+      t.integer :gravity
+      t.integer :density
 
       t.timestamps
     end
