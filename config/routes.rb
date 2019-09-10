@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   resources :planets
 
   get '/planets/:id/moons' , to: 'planets#moons'
+  get '/users/:id/planets' , to: 'users#favorites'
 
   post '/login', to: 'sessions#login'
 
