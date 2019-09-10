@@ -17,7 +17,6 @@ end
 
 resp = JSON.parse( RestClient.get(api) )
 
-
 arr = []
 
 # customize API response to have around planets as nill
@@ -58,16 +57,19 @@ pairPlanets.each do |planet|
 end
 
 
+solarSystem = arr.each do |planet|
+    if planet[:isPlanet] == true || planet[:aka] == "Sun"
+        planet[:isPlanet] = true
+        planet[:withInSolarSystem] = true
+    else
+        planet[:withInSolarSystem] = false
+    end
+end
+
 nonPlanets = arr.select do |planet|
     planet[:isPlanet] == false
 end
 
-solarSystem = arr.each do |planet|
-    if planet[:isPlanet] == true || planet[:aka] == "Sun"
-        planet[:isPlanet] = true
-    end
-    planet[:withInSolarSystem] = true
-end
 
 planets = solarSystem.select do |planet|
    planet[:isPlanet]
@@ -76,14 +78,16 @@ end.sort_by do |planet|
 end
 
 planets.each do |planet|
-    if planet[:name] == "steins"
+    if planet[:aka] == "Mercury"
+        newName = 'Mercury_(planet)'
+    elsif ["136472 Makemake", "136108 Haumea"].include?(planet[:aka])
         newName = planet[:name]
-    elsif planet[:aka].include?("comet")
-        newName = planet[:aka]
-    elsif planet[:name] == "s19"
-        newName = planet[:aka]
+    elsif planet[:aka] == "136199 Eris"
+        newName = "Eris_(dwarf_planet)"
+    elsif planet[:aka] == "1 Ceres"
+        newName = 'Ceres_(dwarf_planet)'
     else
-        newName= planet[:aka].split()[-1]
+        newName = planet[:aka]
     end
     url = wiki(newName)
     wikiResp = JSON.parse( RestClient.get(url))
@@ -92,7 +96,51 @@ planets.each do |planet|
 end
 
 
+nonPlanets.each do |planet|
+    if planet[:name] == "steins"
+        newName = "2867_%C5%A0teins"
+    elsif planet[:aka].include?("comet")
+        newName = planet[:aka]
+    elsif planet[:aka] == "Shoemaker-Levy 9"
+        newName = "Comet_Shoemaker%E2%80%93Levy_9"
+    elsif planet[:aka] == "Ultima Thule"
+        newName = "(486958)_2014_MU69"
+    elsif planet[:aka] == "3 Junon"
+        newName = "3_Juno"
+    else
+        newName= planet[:aka].split().join("_")
+    end
+    url = wiki(newName)
+    wikiResp = JSON.parse( RestClient.get(url))
+    filteredWikiResp = wikiResp["query"]["pages"].values
+    planet[:info] = filteredWikiResp[0]["extract"]
+end
+
+# binding.pry
+# puts "hello"
 planets.each do |planet|
+    createdPlanet = Planet.create(
+        name:planet[:aka],
+        latin_name: planet[:name],
+        isPlanet: planet[:isPlanet],
+        density: planet[:density],
+        gravity: planet[:gravity],
+        info: planet[:info],
+        distanceFromSun: planet[:distanceFromSun],
+        withInSolarSystem: planet[:withInSolarSystem]
+    )
+    planet[:moon].each do |moon|
+        Moon.create(
+            planet_id: createdPlanet.id,
+            name:moon[:aka],
+            isPlanet: moon[:isPlanet],
+            density: moon[:density],
+            gravity: moon[:gravity]
+        )
+    end
+end
+
+nonPlanets.each do |planet|
     createdPlanet = Planet.create(
         name:planet[:aka],
         latin_name: planet[:name],
