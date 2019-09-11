@@ -6,7 +6,7 @@ class UsersController < ApplicationController
         user = User.new(username: params[:username], password: params[:password])
 
         if user.save
-          render json: {user: user.id, token: JWT.encode({userId: user.id}, 'secret'), planets: user.planets}
+          render json: {user: user.id, username: user.username, token: JWT.encode({userId: user.id}, 'secret'), planets: user.planets}
         else
           render json: {errors: user.errors.full_messages}
         end
