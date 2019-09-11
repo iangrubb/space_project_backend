@@ -13,9 +13,14 @@ class UsersController < ApplicationController
 
     end
 
-    def favorites
+    def destroyFav
       user = User.find(params[:id])
-      render json: user.planets
-  end
+      favorite = Favorite.find_by(planet_id: params[:planet_id], user_id: params[:id])
+      favorite.destroy
+    end
 
+    def favorites
+      favorite = Favorite.create(user_id: params[:user], planet_id: params[:planet])
+      render json: favorite
+    end
 end

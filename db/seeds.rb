@@ -18,6 +18,70 @@ end
 resp = JSON.parse( RestClient.get(api) )
 
 arr = []
+constellationArr = []
+constellation = [
+    "Canis Major",
+    "Andromeda",
+    "Apus",
+    "Aquarius",
+    "Ara",
+    "Camelopardalis",
+    "Cancer",
+    "Capricornus",
+    "Carina",
+    "Cassiopeia",
+    "Cepheus",
+    "Cetus",
+    "Chamaeleon",
+    "Corona Borealis",
+    "Corvus",
+    "Crater",
+    "Cygnus",
+    "Dorado",
+    "Gemini",
+    "Hercules",
+    "Lacerta",
+    "Lepus",
+    "Libra",
+    "Lupus",
+    "Lyra",
+    "Orion",
+    "Phoenix",
+    "Scorpius",
+    "Taurus",
+    "Ursa Major",
+    "Virgo"
+  ]
+
+constellation.each do |constellation|
+    hash = {
+        name: constellation,
+        aka: constellation,
+        isPlanet:false,
+        isConstellation: true,
+        distanceFromSun: 0,
+        withInSolarSystem: true
+    }
+    constellationArr.push(hash)
+end
+
+constellationArr.each do |constellation|
+    if constellation[:name].split().length == 2
+        newName = constellation[:name]
+    elsif ["Apus","Camelopardalis",'Capricornus','Cetus','Chamaeleon','Dorado','Lacerta','Lyra','Scorpius'].include?(constellation[:name])
+        newName = constellation[:name]
+    else
+        newName = constellation[:name]+'_(constellation)'
+    end
+    url = wiki(newName)
+    wikiResp = JSON.parse( RestClient.get(url))
+    filteredWikiResp = wikiResp["query"]["pages"].values
+    constellation[:info] = filteredWikiResp[0]["extract"]
+end
+
+# binding.pry
+# puts "hello"
+
 
 # customize API response to have around planets as nill
 soloPlanets = resp['bodies'].select do |planet|
@@ -27,8 +91,7 @@ end.each do |planet|
         name: planet["id"],
         aka: planet["englishName"],
         isPlanet: planet["isPlanet"],
-        density: planet["density"],
-        gravity: planet["gravity"],
+        isConstellation: false,
         moon: [],
         distanceFromSun: planet["perihelion"],
         withInSolarSystem: false
@@ -116,15 +179,12 @@ nonPlanets.each do |planet|
     planet[:info] = filteredWikiResp[0]["extract"]
 end
 
-# binding.pry
-# puts "hello"
 planets.each do |planet|
     createdPlanet = Planet.create(
         name:planet[:aka],
         latin_name: planet[:name],
         isPlanet: planet[:isPlanet],
-        density: planet[:density],
-        gravity: planet[:gravity],
+        isConstellation: planet[:isConstellation],
         info: planet[:info],
         distanceFromSun: planet[:distanceFromSun],
         withInSolarSystem: planet[:withInSolarSystem]
@@ -140,13 +200,24 @@ planets.each do |planet|
     end
 end
 
+constellationArr.each do |constellation|
+    Planet.create(
+        name:constellation[:aka],
+        latin_name: constellation[:name],
+        isPlanet: constellation[:isPlanet],
+        isConstellation: constellation[:isConstellation],
+        info: constellation[:info],
+        distanceFromSun: constellation[:distanceFromSun],
+        withInSolarSystem: constellation[:withInSolarSystem],
+    )
+end
+
 nonPlanets.each do |planet|
     createdPlanet = Planet.create(
         name:planet[:aka],
         latin_name: planet[:name],
         isPlanet: planet[:isPlanet],
-        density: planet[:density],
-        gravity: planet[:gravity],
+        isConstellation: planet[:isConstellation],
         info: planet[:info],
         distanceFromSun: planet[:distanceFromSun],
         withInSolarSystem: planet[:withInSolarSystem]
