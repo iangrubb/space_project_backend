@@ -2,7 +2,7 @@ class SessionsController < ApplicationController
 
 
     def login
-        user = User.find_by(username: params[:username])
+        user = User.find_by(username: params[:username].downcase)
         if user && user.authenticate(params[:password])
           render json: {user: user.id, username: user.username, token: JWT.encode({userId: user.id}, 'secret'),planets:user.planets} 
         else 
